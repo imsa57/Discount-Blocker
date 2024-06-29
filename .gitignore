@@ -17,5 +17,4 @@ logs
 
 # extensions build output
 extensions/*/build
-
 # lock files

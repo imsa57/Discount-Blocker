@@ -14,6 +14,7 @@ export default reactExtension(
   () => <Extension />
 );
 
+// working perfectly for manual discount not for automatic discount
 function Extension() {
   const { query } = useApi();
   const cartItem = useCartLines();
