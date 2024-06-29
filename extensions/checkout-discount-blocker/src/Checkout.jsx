@@ -1,57 +1,48 @@
 import {
-  Banner,
   useApi,
-  useTranslate,
   reactExtension,
   useCartLines,
-  useDiscountCodes,
   useApplyDiscountCodeChange,
   Text,
   View,
-  useApplyCartLinesChange,
   useDiscountAllocations,
 } from "@shopify/ui-extensions-react/checkout";
 import { useEffect, useMemo, useState } from "react";
 
-export default reactExtension("purchase.checkout.block.render", () => (
-  <Extension />
-));
+export default reactExtension(
+  "purchase.checkout.reductions.render-after",
+  () => <Extension />
+);
 
 function Extension() {
   const { query } = useApi();
   const cartItem = useCartLines();
   const discountCodeFunction = useApplyDiscountCodeChange();
-  const [tagfound, setTagFound] = useState(false);
   const discountcodeCart = useDiscountAllocations();
+  const [tagfound, setTagFound] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
 
   const allCartLineDiscount = useMemo(
     () =>
       cartItem
         .map((item) => item.discountAllocations)
         .flat()
-        .map((item) => {
-          if (item.type == "code") {
-            return item.code;
-          } else {
-            return item.title;
-          }
-        }),
+        .map((item) => (item.type === "code" ? item.code : item.title)),
     [cartItem]
   );
+
   const allCartDiscount = useMemo(
     () =>
-      discountcodeCart.map((item) => {
-        if (item.type == "code") {
-          return item.code;
-        } else {
-          return item.title;
-        }
-      }),
+      discountcodeCart.map((item) =>
+        item.type === "code" ? item.code : item.title
+      ),
     [discountcodeCart]
   );
+
   useEffect(() => {
     const productIds = cartItem.map((item) => item.merchandise.product.id);
-    const getProductTags = async () => {
+
+    async function getProductTags() {
       const queryBody = `{
         nodes(ids: ${JSON.stringify(productIds)}) {
           ... on Product {
@@ -60,34 +51,38 @@ function Extension() {
         }
       }`;
 
-      const { data } = await query(queryBody);
-      const allTags = data.nodes.map((item) => item.tags).flat();
-      const isTagFound = allTags.some((item) => item === "block-discount");
-      setTagFound(isTagFound);
-    };
+      try {
+        const { data } = await query(queryBody);
+        const allTags = data.nodes.flatMap((item) => item.tags || []);
+        const isTagFound = allTags.includes("block-discount");
+        setTagFound(isTagFound);
+      } catch (error) {
+        console.error("Error fetching product tags:", error);
+      }
+    }
+
     getProductTags();
-  }, []);
+  }, [cartItem]);
 
   useEffect(() => {
-    if (tagfound) {
-      const allDiscountCode = [...allCartLineDiscount, ...allCartDiscount];
-      console.log(allDiscountCode);
-      allDiscountCode.forEach((item) => {
+    const allDiscountCode = [...allCartLineDiscount, ...allCartDiscount];
+
+    if (tagfound && allDiscountCode.length) {
+      allDiscountCode.forEach((item) =>
         discountCodeFunction({
           code: item,
           type: "removeDiscountCode",
-        });
-      });
+        })
+      );
+      setShowMessage(true);
     }
-  }, [tagfound]);
+  }, [tagfound, discountcodeCart, cartItem]);
 
   return (
     <>
-      {tagfound ? (
-        <View padding={"tight"} inlineAlignment={"center"}>
-          <Text appearance="critical">You can't apply discount code...</Text>
-        </View>
-      ) : null}
+      {showMessage && (
+        <Text appearance="critical">You can not apply a discount code...</Text>
+      )}
     </>
   );
 }
