@@ -75,6 +75,9 @@ function Extension() {
         })
       );
       setShowMessage(true);
+      setTimeout(() => {
+        setShowMessage(false);
+      }, 3000);
     }
   }, [tagfound, discountcodeCart, cartItem]);
 

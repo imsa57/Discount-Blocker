@@ -156,4 +156,4 @@ React keys must be passed directly to JSX without using spread:
             tags
           }
         }
-      }`;try{let{data:Je}=yield p(se),Ve=Je.nodes.flatMap(qe=>qe.tags||[]).includes("block-discount");U(Ve)}catch(Je){console.error("Error fetching product tags:",Je)}})}q()},[c]),(0,fr.useEffect)(()=>{let H=[...L,...h];g&&H.length&&(H.forEach(q=>y({code:q,type:"removeDiscountCode"})),B(!0))},[g,R,c]),(0,Wi.jsx)(Wi.Fragment,{children:K&&(0,Wi.jsx)(Wd,{appearance:"critical",children:"You can not apply a discount code..."})})}})();
+      }`;try{let{data:Je}=yield p(se),Ve=Je.nodes.flatMap(qe=>qe.tags||[]).includes("block-discount");U(Ve)}catch(Je){console.error("Error fetching product tags:",Je)}})}q()},[c]),(0,fr.useEffect)(()=>{let H=[...L,...h];g&&H.length&&(H.forEach(q=>y({code:q,type:"removeDiscountCode"})),B(!0),setTimeout(()=>{B(!1)},3e3))},[g,R,c]),(0,Wi.jsx)(Wi.Fragment,{children:K&&(0,Wi.jsx)(Wd,{appearance:"critical",children:"You can not apply a discount code..."})})}})();
